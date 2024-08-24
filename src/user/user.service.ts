@@ -70,15 +70,14 @@ export class UserService implements OnModuleDestroy {
 
       // Store the image hash in the database (for future retrieval)
       const imageHash = crypto.createHash('md5').update(imageBuffer).digest('hex');
-      await this.userModel.updateOne({ id: userId }, { $set: { avatarHash: imageHash } });
-      
+      await this.userModel.updateOne({ uid: userId }, { $set: { avatarHash: imageHash } });
       return imageBuffer.toString('base64');
     }
   }
 
   // Delete the user's avatar from the file system and the database
   async deleteUserAvatar(userId: string): Promise<void> {
-    const user = await this.userModel.findOne({ id: userId }).exec();
+    const user = await this.userModel.findOne({ uid: userId }).exec();
     if (!user || !user.avatar) {
       throw new Error('User or avatar not found');
     }
@@ -89,7 +88,7 @@ export class UserService implements OnModuleDestroy {
     }
 
     // Remove the avatar entry from the database
-    await this.userModel.updateOne({ id: userId }, { $unset: { avatar: 1, avatarHash: 1 } });
+    await this.userModel.updateOne({ uid: userId }, { $unset: { avatar: 1, avatarHash: 1 } });
   }
 
   async onModuleDestroy() {
